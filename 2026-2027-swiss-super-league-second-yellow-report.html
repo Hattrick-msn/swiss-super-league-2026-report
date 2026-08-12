@@ -518,7 +518,7 @@
         return;
       }
       loading = true;
-      setSyncState("loading",isGitHubPages ? "正在读取最新公开快照" : "正在同步官网数据",isGitHubPages ? "公开数据由后台定时更新。" : (force ? "已请求立即刷新。" : "页面每60秒自动检查一次。"));
+      setSyncState("loading",isGitHubPages ? "正在读取最新公开快照" : "正在同步官网数据",isGitHubPages ? "公开数据由 GitHub Actions 定时更新，页面每60秒检查一次。" : (force ? "已请求立即刷新。" : "页面每60秒自动检查一次。"));
       try {
         const endpoint = isGitHubPages ? `${staticReportUrl}?_=${Date.now()}` : `/api/report${force ? "?refresh=1" : ""}`;
         const response = await fetch(endpoint,{cache:"no-store"});
