@@ -1,0 +1,43 @@
+name: Update Swiss Super League report
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: swiss-super-league-report-update
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out public report
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Refresh official SFL data
+        run: |
+          python swiss-super-league-report-server.py \
+            --refresh-once \
+            --export-report report-assets/swiss-super-league-report.json
+
+      - name: Commit changed report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add report-assets/swiss-super-league-report.json report-assets/swiss-super-league-report-cache.json
+          if git diff --cached --quiet; then
+            echo "No report changes"
+          else
+            git commit -m "Update Swiss Super League report"
+            git push
+          fi
