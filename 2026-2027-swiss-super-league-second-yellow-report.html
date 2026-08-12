@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>2026/27 瑞士超两黄变红实时报告</title>
+  <style>
+    :root {
+      --red: #c9082f;
+      --red-dark: #8e0825;
+      --yellow: #f4c430;
+      --ink: #17212b;
+      --muted: #66717d;
+      --line: #d9dde2;
+      --soft: #f3f5f6;
+      --teal: #007f79;
+      --white: #fff;
+      --page: 1480px;
+      --shadow: 0 8px 24px rgba(23, 33, 43, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #eef0f2;
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      letter-spacing: 0;
+    }
+    button, input { font: inherit; letter-spacing: 0; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    .page-inner { width: min(calc(100% - 40px), var(--page)); margin: 0 auto; }
+    .masthead { color: #fff; background: #131b23; border-bottom: 5px solid var(--red); }
+    .masthead-inner {
+      width: min(calc(100% - 40px), var(--page));
+      min-height: 142px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 24px 0;
+    }
+    .brand { display: flex; align-items: center; gap: 24px; min-width: 0; }
+    .brand img { width: 190px; height: 82px; object-fit: contain; object-position: left center; }
+    .title-group { min-width: 0; }
+    .eyebrow { margin: 0 0 3px; color: var(--yellow); font-weight: 800; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(25px, 3vw, 42px); line-height: 1.15; }
+    .subtitle { margin: 7px 0 0; color: #c9d0d6; }
+    .print-button, .source-link {
+      min-height: 40px;
+      border: 1px solid rgba(255,255,255,.38);
+      border-radius: 4px;
+      padding: 8px 14px;
+      color: #fff;
+      background: transparent;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .print-button:hover, .print-button:focus-visible { border-color: var(--yellow); outline: none; }
+    main { padding: 24px 0 48px; }
+    .summary-band {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 6px 6px 0 0;
+    }
+    .metric { min-height: 104px; display: flex; flex-direction: column; justify-content: center; padding: 20px 24px; border-right: 1px solid var(--line); }
+    .metric:last-child { border-right: 0; }
+    .metric-value { color: var(--red); font-size: 34px; font-weight: 900; line-height: 1; }
+    .metric-label { margin-top: 8px; color: var(--muted); font-weight: 650; }
+    .sync-band {
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 11px 18px;
+      background: #202a34;
+      color: #fff;
+      border-left: 1px solid #202a34;
+      border-right: 1px solid #202a34;
+    }
+    .sync-message { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .sync-detail { color: #bfc7ce; }
+    .status-dot { width: 9px; height: 9px; flex: 0 0 9px; border-radius: 50%; background: #58c786; }
+    .status-dot.loading { background: var(--yellow); animation: pulse 1.2s infinite; }
+    .status-dot.error { background: #ff6a6a; }
+    @keyframes pulse { 50% { opacity: .38; } }
+    .refresh-button {
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+      border: 1px solid #66717d;
+      border-radius: 4px;
+      color: #fff;
+      background: transparent;
+      font-size: 23px;
+      line-height: 1;
+    }
+    .refresh-button:hover, .refresh-button:focus-visible { border-color: var(--yellow); outline: none; }
+    .refresh-button:disabled { opacity: .45; cursor: wait; }
+    .notice {
+      padding: 14px 18px;
+      background: #fff8d6;
+      border: 1px solid #e8d473;
+      border-top: 0;
+      border-radius: 0 0 6px 6px;
+    }
+    .notice code { font-size: .9em; }
+    .section { margin-top: 26px; }
+    .section-head, .ranking-toolbar, .result-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    h2 { margin: 0; font-size: 22px; }
+    .ranking-tabs, .segments { display: flex; align-items: center; gap: 3px; flex-wrap: wrap; }
+    .ranking-tabs button, .segments button {
+      min-height: 36px;
+      padding: 7px 13px;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      color: var(--ink);
+      background: var(--white);
+    }
+    .ranking-tabs button[aria-pressed="true"], .segments button[aria-pressed="true"] {
+      border-color: var(--red);
+      color: #fff;
+      background: var(--red);
+    }
+    .ranking-source { display: flex; justify-content: space-between; gap: 16px; margin: 0 0 10px; color: var(--muted); }
+    .ranking-source a { color: var(--red-dark); font-weight: 700; }
+    .ranking-table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--white); }
+    .ranking-table { width: 100%; min-width: 720px; border-collapse: collapse; }
+    .ranking-table th, .ranking-table td { height: 54px; padding: 9px 16px; border-bottom: 1px solid var(--line); text-align: left; }
+    .ranking-table th { color: #fff; background: #26313c; font-size: 13px; text-transform: uppercase; }
+    .ranking-table th:nth-child(n+3), .ranking-table td:nth-child(n+3) { text-align: center; }
+    .ranking-table tbody tr:last-child td { border-bottom: 0; }
+    .ranking-table tbody tr:hover { background: #f7f8f9; }
+    .double-yellow-row { background: #fff9dc; }
+    .rank-number { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border-radius: 50%; background: var(--soft); font-weight: 850; }
+    .ranking-player { display: block; font-weight: 800; }
+    .ranking-team { display: block; color: var(--muted); font-size: 12px; }
+    .ranking-value { display: inline-flex; min-width: 32px; height: 30px; align-items: center; justify-content: center; border-radius: 3px; background: var(--soft); font-weight: 900; }
+    .ranking-value.primary { color: #fff; background: var(--red); }
+    .double-yellow-note { color: var(--red-dark); font-weight: 850; }
+    .card-chip { display: inline-block; width: 12px; height: 17px; margin-right: 7px; border-radius: 2px; vertical-align: -3px; }
+    .card-chip.yellow { background: var(--yellow); }
+    .card-chip.red { background: var(--red); }
+    .card-chip.split { background: linear-gradient(90deg, var(--yellow) 0 50%, var(--red) 50%); }
+    .ranking-footnote { margin: 10px 0 0; color: var(--muted); font-size: 13px; }
+    .toolbar {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 16px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+    .search-wrap { flex: 1 1 520px; }
+    .search-wrap label { display: block; margin-bottom: 5px; color: var(--muted); font-size: 12px; font-weight: 750; }
+    .search-wrap input { width: 100%; min-height: 40px; padding: 8px 12px; border: 1px solid #aeb5bc; border-radius: 3px; color: var(--ink); background: #fff; }
+    .search-wrap input:focus { border-color: var(--teal); outline: 2px solid rgba(0,127,121,.18); }
+    .result-heading { margin-top: 20px; }
+    #result-count { color: var(--muted); }
+    .match-list { display: grid; gap: 10px; }
+    .match-row {
+      display: grid;
+      grid-template-columns: 150px minmax(260px, .8fr) minmax(420px, 1.5fr) 118px;
+      align-items: center;
+      gap: 18px;
+      min-height: 126px;
+      padding: 16px 18px;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--red);
+      border-radius: 6px;
+      box-shadow: var(--shadow);
+    }
+    .date { display: block; font-weight: 850; }
+    .stage { display: block; margin-top: 4px; color: var(--muted); }
+    .matchup { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+    .team { font-weight: 800; }
+    .team.away { text-align: right; }
+    .score { min-width: 66px; padding: 8px 9px; border-radius: 3px; text-align: center; color: #fff; background: #202a34; font-size: 18px; font-weight: 900; }
+    .event-stack { display: grid; gap: 9px; }
+    .event { display: grid; grid-template-columns: minmax(150px, .85fr) minmax(260px, 1.15fr); align-items: center; gap: 12px; }
+    .person { font-weight: 850; }
+    .event-meta { color: var(--muted); font-size: 12px; }
+    .cards-flow { display: grid; grid-template-columns: 1fr 20px 1.2fr; align-items: center; gap: 6px; }
+    .card-event { display: grid; grid-template-columns: 30px auto; grid-template-rows: auto auto; column-gap: 8px; align-items: center; }
+    .card-icons { grid-row: 1 / 3; display: flex; width: 30px; }
+    .card-mark { display: block; width: 15px; height: 22px; border-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,.24); }
+    .card-mark.yellow { background: var(--yellow); }
+    .card-mark.red { margin-left: -5px; background: var(--red); transform: translateY(4px); }
+    .card-time { font-weight: 900; }
+    .card-label { color: var(--muted); font-size: 11px; }
+    .flow-arrow { color: var(--red); font-size: 20px; font-weight: 900; text-align: center; }
+    .source-cell { border-left: 1px solid var(--line); padding-left: 14px; }
+    .source-cell a { display: block; color: var(--red-dark); font-weight: 800; }
+    .record-id { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; overflow-wrap: anywhere; }
+    .empty-state { padding: 34px; border: 1px dashed #aeb5bc; border-radius: 6px; color: var(--muted); background: var(--white); text-align: center; }
+    .methodology { margin-top: 28px; padding: 22px; color: #e8ecef; background: #202a34; border-radius: 6px; }
+    .method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .methodology h2, .methodology h3 { color: #fff; }
+    .methodology h3 { margin: 18px 0 7px; font-size: 16px; }
+    .methodology ul { margin: 8px 0 0; padding-left: 20px; }
+    .methodology a { color: var(--yellow); }
+    .source-status { color: var(--yellow); font-weight: 800; }
+    footer { padding: 18px 0 30px; color: var(--muted); font-size: 12px; }
+    @media (max-width: 1050px) {
+      .summary-band { grid-template-columns: 1fr 1fr; }
+      .metric:nth-child(2) { border-right: 0; }
+      .metric:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+      .match-row { grid-template-columns: 140px 1fr; }
+      .event-stack { grid-column: 1 / -1; }
+      .source-cell { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); padding: 10px 0 0; display: flex; gap: 12px; align-items: center; }
+    }
+    @media (max-width: 720px) {
+      .page-inner, .masthead-inner { width: min(calc(100% - 24px), var(--page)); }
+      .masthead-inner { min-height: 0; align-items: flex-start; }
+      .brand { align-items: flex-start; gap: 14px; }
+      .brand img { width: 92px; height: 55px; }
+      .subtitle { font-size: 12px; }
+      .print-button { display: none; }
+      .summary-band { grid-template-columns: 1fr 1fr; }
+      .metric { min-height: 86px; padding: 14px; }
+      .metric-value { font-size: 28px; }
+      .metric-label { font-size: 12px; }
+      .sync-message { align-items: flex-start; flex-wrap: wrap; }
+      .sync-detail { width: calc(100% - 20px); margin-left: 19px; }
+      .ranking-toolbar, .section-head, .result-heading, .ranking-source { align-items: flex-start; flex-direction: column; }
+      .toolbar { align-items: stretch; flex-direction: column; }
+      .segments, .ranking-tabs { display: grid; grid-template-columns: repeat(3, 1fr); width: 100%; }
+      .segments button, .ranking-tabs button { padding: 6px; font-size: 12px; }
+      .match-row { grid-template-columns: 1fr; gap: 13px; padding: 15px; }
+      .event-stack, .source-cell { grid-column: auto; }
+      .event { grid-template-columns: 1fr; }
+      .cards-flow { grid-template-columns: 1fr 18px 1.15fr; }
+      .method-grid { grid-template-columns: 1fr; gap: 4px; }
+    }
+    @media print {
+      body { background: #fff; }
+      .masthead { color: var(--ink); background: #fff; border-bottom: 2px solid var(--red); }
+      .eyebrow, .subtitle { color: var(--ink); }
+      .print-button, .toolbar, .refresh-button, .ranking-tabs, .source-cell a { display: none; }
+      main { padding-top: 14px; }
+      .match-row { break-inside: avoid; box-shadow: none; }
+      .methodology { break-before: page; color: var(--ink); background: #fff; border: 1px solid var(--line); }
+      .methodology h2, .methodology h3 { color: var(--ink); }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="brand">
+        <img src="report-assets/sfl-logo.png" alt="Brack Super League 标志">
+        <div class="title-group">
+          <p class="eyebrow">Brack Super League 2026/27</p>
+          <h1>两黄变红比赛实时核对报告</h1>
+          <p class="subtitle">依据瑞士足球联赛官网与 Opta 逐场记录整理 · 瑞士当地时间</p>
+        </div>
+      </div>
+      <button class="print-button" type="button" onclick="window.print()">打印 / 导出 PDF</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-inner">
+      <section class="summary-band" aria-label="统计摘要">
+        <div class="metric"><span class="metric-value" id="metric-matches">1</span><span class="metric-label">出现第二黄罚下的比赛</span></div>
+        <div class="metric"><span class="metric-value" id="metric-events">1</span><span class="metric-label">两黄变红事件</span></div>
+        <div class="metric"><span class="metric-value" id="metric-players">1</span><span class="metric-label">涉及球员</span></div>
+        <div class="metric"><span class="metric-value" id="metric-checked">14</span><span class="metric-label">已读取的官网比赛记录</span></div>
+      </section>
+
+      <div class="sync-band" role="status" aria-live="polite">
+        <div class="sync-message">
+          <span class="status-dot loading" id="status-dot" aria-hidden="true"></span>
+          <strong id="sync-title">正在连接官网数据</strong>
+          <span class="sync-detail" id="sync-detail">页面保留当前快照，连接完成后自动替换。</span>
+        </div>
+        <button class="refresh-button" id="refresh-button" type="button" title="立即刷新" aria-label="立即刷新">↻</button>
+      </div>
+
+      <div class="notice">
+        <strong>统计判定：</strong>逐场记录出现 <code>secondyellow card</code> 即收录。牌榜同时保留官网的普通黄牌、黄红牌和红牌三个独立字段；当前官网口径下，两黄变红球员在赛季牌榜记 <strong>0黄、1黄红、1红</strong>。
+      </div>
+
+      <section class="section" aria-labelledby="ranking-title">
+        <div class="ranking-toolbar">
+          <h2 id="ranking-title">官网球员牌榜</h2>
+          <div class="ranking-tabs" role="group" aria-label="牌榜类型">
+            <button type="button" data-ranking="yellow" aria-pressed="true">黄牌榜 <span id="yellow-ranking-count">0</span></button>
+            <button type="button" data-ranking="doubleYellow" aria-pressed="false">黄红牌榜 <span id="double-yellow-ranking-count">1</span></button>
+            <button type="button" data-ranking="red" aria-pressed="false">红牌榜 <span id="red-ranking-count">1</span></button>
+          </div>
+        </div>
+        <p class="ranking-source">
+          <span id="ranking-caption">按官网普通黄牌数降序排列。</span>
+          <a href="https://sfl.ch/dashboard-stats/stats-superleague?tab=player&type=total+second+yellow&cursor=0" target="_blank" rel="noopener noreferrer">SFL 统计页</a>
+        </p>
+        <div class="ranking-table-wrap">
+          <table class="ranking-table">
+            <thead><tr>
+              <th scope="col">排名</th>
+              <th scope="col">球员 / 球队</th>
+              <th scope="col"><span class="card-chip yellow" aria-hidden="true"></span>黄牌</th>
+              <th scope="col"><span class="card-chip split" aria-hidden="true"></span>黄红牌</th>
+              <th scope="col"><span class="card-chip red" aria-hidden="true"></span>红牌</th>
+            </tr></thead>
+            <tbody id="ranking-body"></tbody>
+          </table>
+        </div>
+        <p class="ranking-footnote">牌榜数值直接读取 SFL 官网的 Opta 聚合字段。逐场时间线仍会展示第一次普通黄牌和第二次黄牌的实际分钟。</p>
+      </section>
+
+      <section class="section" aria-labelledby="matches-title">
+        <div class="toolbar">
+          <div class="search-wrap">
+            <label for="search">搜索比赛、球队、球员或比赛 ID</label>
+            <input id="search" type="search" autocomplete="off" placeholder="例如：Imourane Hassane、Grasshopper、1kfz06">
+          </div>
+          <div class="segments" role="group" aria-label="记录筛选">
+            <button type="button" data-filter="all" aria-pressed="true">全部</button>
+            <button type="button" data-filter="recent" aria-pressed="false">最近7天</button>
+            <button type="button" data-filter="regular" aria-pressed="false">联赛阶段</button>
+          </div>
+        </div>
+        <div class="result-heading">
+          <h2 id="matches-title">逐场记录</h2>
+          <span id="result-count" aria-live="polite"></span>
+        </div>
+        <div id="match-list" class="match-list"></div>
+      </section>
+
+      <section class="methodology" aria-labelledby="method-title">
+        <h2 id="method-title">口径与来源</h2>
+        <div class="method-grid">
+          <div>
+            <h3>实时筛查口径</h3>
+            <ul>
+              <li>赛事：Brack Super League 2026/27。</li>
+              <li>页面每60秒读取本地服务；服务复核官网已开始或已结束的比赛。</li>
+              <li>罚下判定采用 Opta 的 <code>secondyellow card</code> 事件，第一张黄牌按同一球员 ID 回溯。</li>
+              <li>比分、出牌分钟、球员和球队名称均来自对应的 SFL 比赛中心。</li>
+            </ul>
+          </div>
+          <div>
+            <h3>数据源说明</h3>
+            <p><span class="source-status">SFL 官网当前比赛中心和统计页使用 Opta。</span>本报告读取官网公开调用的赛程、球员统计与逐场解说数据，不混用博彩牌数规则。Opta 将普通黄牌、第二黄牌和红牌分别采集。</p>
+            <p><a href="https://theanalyst.com/articles/opta-football-stats-definitions" target="_blank" rel="noopener noreferrer">查看 Opta 官方出牌定义</a></p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer><div class="page-inner" id="footer-note">内置快照日期：2026-08-09。球队和球员名称沿用官网写法。本报告不代表 SFL 的纪律裁决文件。</div></footer>
+
+  <script>
+    const seedReport = {
+      lastSync: null,
+      checkedMatches: 14,
+      failures: [],
+      cardLeaderboards: {
+        yellow: [],
+        doubleYellow: [{playerId:"9osic22dxne4mjyzix16v5ses",name:"I. Hassane",team:"Grasshopper Club Zurich",yellow:0,doubleYellow:1,red:1,rank:1}],
+        red: [{playerId:"9osic22dxne4mjyzix16v5ses",name:"I. Hassane",team:"Grasshopper Club Zurich",yellow:0,doubleYellow:1,red:1,rank:1}]
+      },
+      matches: [{
+        id:"1kfz06hudv7o9c8ib4e8t96hg",date:"2026-08-08",time:"20:30",stage:"第3轮",type:"regular",status:"已结束",
+        home:"Servette FC",homeScore:2,awayScore:1,away:"Grasshopper Club Zurich",
+        events:[{playerId:"9osic22dxne4mjyzix16v5ses",person:"Imourane Hassane",team:"Grasshopper Club Zürich",role:"球员",first:"18'",second:"59'",reason:"危险犯规",reasonOriginal:"Second yellow card to Imourane Hassane (Grasshoppers) for a bad foul.",eventId:"2952832163"}]
+      }]
+    };
+
+    const list = document.getElementById("match-list");
+    const search = document.getElementById("search");
+    const resultCount = document.getElementById("result-count");
+    const filterButtons = [...document.querySelectorAll("[data-filter]")];
+    const refreshButton = document.getElementById("refresh-button");
+    const statusDot = document.getElementById("status-dot");
+    const syncTitle = document.getElementById("sync-title");
+    const syncDetail = document.getElementById("sync-detail");
+    const rankingBody = document.getElementById("ranking-body");
+    const rankingCaption = document.getElementById("ranking-caption");
+    const rankingButtons = [...document.querySelectorAll("[data-ranking]")];
+    let activeFilter = "all";
+    let activeRanking = "yellow";
+    let report = seedReport;
+    let loading = false;
+    const isGitHubPages = location.hostname.endsWith(".github.io");
+    const staticReportUrl = "report-assets/swiss-super-league-report.json";
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, character => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;"
+      })[character]);
+    }
+
+    function officialUrl(matchId) {
+      return `https://sfl.ch/match-center/${encodeURIComponent(String(matchId))}`;
+    }
+
+    function formatDate(date, time) {
+      const [year, month, day] = String(date).split("-");
+      return `${year}年${Number(month)}月${Number(day)}日 · ${time}`;
+    }
+
+    function formatSyncTime(value) {
+      if (!value) return "等待首次同步";
+      return new Intl.DateTimeFormat("zh-CN", {
+        timeZone:"Europe/Zurich", year:"numeric", month:"2-digit", day:"2-digit",
+        hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:false
+      }).format(new Date(value)) + "（瑞士）";
+    }
+
+    function minute(value) {
+      if (value === null || value === undefined || value === "") return "时间待定";
+      const text = String(value);
+      return text.includes("'") ? text : `${text}'`;
+    }
+
+    function eventMarkup(event) {
+      const reasonTitle = event.reasonOriginal && event.reasonOriginal !== event.reason
+        ? ` title="官方原文：${escapeHtml(event.reasonOriginal)}"` : "";
+      return `<div class="event">
+        <div><div class="person">${escapeHtml(event.person)}</div><div class="event-meta"${reasonTitle}>${escapeHtml(event.team)} · ${escapeHtml(event.role)} · ${escapeHtml(event.reason)} · 事件 ${escapeHtml(event.eventId)}</div></div>
+        <div class="cards-flow" aria-label="第${escapeHtml(event.first)}第一张黄牌，第${escapeHtml(event.second)}第二张黄牌并被罚下">
+          <span class="card-event"><span class="card-icons" aria-hidden="true"><span class="card-mark yellow"></span></span><span class="card-time">${minute(event.first)}</span><span class="card-label">第一张黄牌</span></span>
+          <span class="flow-arrow" aria-hidden="true">→</span>
+          <span class="card-event"><span class="card-icons" aria-hidden="true"><span class="card-mark yellow"></span><span class="card-mark red"></span></span><span class="card-time">${minute(event.second)}</span><span class="card-label">第二张黄牌 → 红牌（罚下）</span></span>
+        </div>
+      </div>`;
+    }
+
+    function matchMarkup(match) {
+      return `<article class="match-row" id="match-${escapeHtml(match.id)}">
+        <div><time class="date" datetime="${escapeHtml(match.date)}T${escapeHtml(match.time)}">${formatDate(match.date, match.time)}</time><span class="stage">${escapeHtml(match.stage)} · ${escapeHtml(match.status)}</span></div>
+        <div class="matchup" aria-label="${escapeHtml(match.home)} ${escapeHtml(match.homeScore)}比${escapeHtml(match.awayScore)} ${escapeHtml(match.away)}"><span class="team">${escapeHtml(match.home)}</span><span class="score">${escapeHtml(match.homeScore)}–${escapeHtml(match.awayScore)}</span><span class="team away">${escapeHtml(match.away)}</span></div>
+        <div class="event-stack">${match.events.map(eventMarkup).join("")}</div>
+        <div class="source-cell"><a href="${officialUrl(match.id)}" target="_blank" rel="noopener noreferrer">比赛中心</a><span class="record-id">Match ${escapeHtml(match.id)}</span></div>
+      </article>`;
+    }
+
+    function matchesFilter(match) {
+      if (activeFilter === "regular" && match.type !== "regular") return false;
+      if (activeFilter === "recent") {
+        const newest = Math.max(...report.matches.map(item => new Date(`${item.date}T23:59:59`).getTime()));
+        if (newest - new Date(`${match.date}T00:00:00`).getTime() > 7 * 86400000) return false;
+      }
+      const query = search.value.trim().toLocaleLowerCase("zh-CN");
+      if (!query) return true;
+      const searchable = [match.id, match.date, match.stage, match.home, match.away,
+        ...match.events.flatMap(event => [event.person,event.team,event.role,event.reason,event.reasonOriginal,event.eventId])
+      ].join(" ").toLocaleLowerCase("zh-CN");
+      return searchable.includes(query);
+    }
+
+    function renderRankings() {
+      const boards = report.cardLeaderboards || {};
+      const rows = Array.isArray(boards[activeRanking]) ? boards[activeRanking] : [];
+      const counts = {
+        yellow:Array.isArray(boards.yellow) ? boards.yellow.length : 0,
+        doubleYellow:Array.isArray(boards.doubleYellow) ? boards.doubleYellow.length : 0,
+        red:Array.isArray(boards.red) ? boards.red.length : 0
+      };
+      document.getElementById("yellow-ranking-count").textContent = counts.yellow;
+      document.getElementById("double-yellow-ranking-count").textContent = counts.doubleYellow;
+      document.getElementById("red-ranking-count").textContent = counts.red;
+      rankingCaption.textContent = ({yellow:"按官网普通黄牌数降序排列。",doubleYellow:"按官网黄红牌（第二黄罚下）次数降序排列。",red:"按官网红牌数降序排列，包含两黄罚下。"})[activeRanking];
+      rankingBody.innerHTML = rows.length ? rows.map(row => `<tr class="${Number(row.doubleYellow)>0 ? "double-yellow-row" : ""}">
+        <td><span class="rank-number">${escapeHtml(row.rank)}</span></td>
+        <td><span class="ranking-player">${escapeHtml(row.name)}</span><span class="ranking-team">${escapeHtml(row.team)}</span></td>
+        <td><span class="ranking-value ${activeRanking==="yellow" ? "primary" : ""}">${escapeHtml(row.yellow)}</span></td>
+        <td>${Number(row.doubleYellow)>0 ? `<span class="double-yellow-note">${escapeHtml(row.doubleYellow)} 次</span>` : "-"}</td>
+        <td><span class="ranking-value ${activeRanking==="red" ? "primary" : ""}">${escapeHtml(row.red)}</span></td>
+      </tr>`).join("") : '<tr><td colspan="5">官网当前没有可显示的数据。</td></tr>';
+    }
+
+    function render() {
+      const matches = Array.isArray(report.matches) ? report.matches : [];
+      const visible = matches.filter(matchesFilter);
+      list.innerHTML = visible.length ? visible.map(matchMarkup).join("") : '<div class="empty-state">没有符合当前条件的记录。</div>';
+      const events = visible.reduce((sum,match)=>sum+match.events.length,0);
+      const allEvents = matches.reduce((sum,match)=>sum+match.events.length,0);
+      const players = new Set(matches.flatMap(match=>match.events.map(event=>event.playerId)));
+      resultCount.textContent = `显示 ${visible.length} 场 · ${events} 次事件`;
+      document.getElementById("metric-matches").textContent = matches.length;
+      document.getElementById("metric-events").textContent = allEvents;
+      document.getElementById("metric-players").textContent = players.size;
+      document.getElementById("metric-checked").textContent = report.checkedMatches ?? "-";
+      renderRankings();
+    }
+
+    function setSyncState(state,title,detail) {
+      statusDot.className = `status-dot${state ? ` ${state}` : ""}`;
+      syncTitle.textContent = title;
+      syncDetail.textContent = detail;
+      refreshButton.disabled = state === "loading";
+    }
+
+    async function loadReport(force=false) {
+      if (loading || location.protocol === "file:") {
+        if (location.protocol === "file:") setSyncState("error","当前显示内置快照","通过本地实时服务打开后可自动读取官网新比赛。");
+        return;
+      }
+      loading = true;
+      setSyncState("loading",isGitHubPages ? "正在读取最新公开快照" : "正在同步官网数据",isGitHubPages ? "公开数据由后台定时更新。" : (force ? "已请求立即刷新。" : "页面每60秒自动检查一次。"));
+      try {
+        const endpoint = isGitHubPages ? `${staticReportUrl}?_=${Date.now()}` : `/api/report${force ? "?refresh=1" : ""}`;
+        const response = await fetch(endpoint,{cache:"no-store"});
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const nextReport = await response.json();
+        if (nextReport.lastSync && Array.isArray(nextReport.matches)) report = nextReport;
+        render();
+        if (nextReport.refreshing) {
+          setSyncState("loading","官网数据正在更新",`当前已读取 ${nextReport.checkedMatches ?? 0} 场，完成后页面会自动刷新。`);
+          window.setTimeout(()=>loadReport(false),3000);
+        } else if (nextReport.failures?.length) {
+          setSyncState("error","已显示最近一次有效数据",`${formatSyncTime(nextReport.lastSync)} · ${nextReport.failures.length} 项读取失败`);
+        } else {
+          setSyncState("","官方数据已同步",`${formatSyncTime(nextReport.lastSync)} · 已读取 ${nextReport.checkedMatches ?? 0} 场`);
+        }
+        document.getElementById("footer-note").textContent = `最近同步：${formatSyncTime(nextReport.lastSync)}。球队和球员名称沿用官网写法。本报告不代表 SFL 的纪律裁决文件。`;
+      } catch (error) {
+        setSyncState("error",isGitHubPages ? "公开快照暂时不可用" : "官网连接暂时不可用","继续显示最近一次有效快照，下一轮会自动重试。");
+      } finally { loading = false; }
+    }
+
+    filterButtons.forEach(button=>button.addEventListener("click",()=>{
+      activeFilter=button.dataset.filter;
+      filterButtons.forEach(item=>item.setAttribute("aria-pressed",String(item===button)));
+      render();
+    }));
+    rankingButtons.forEach(button=>button.addEventListener("click",()=>{
+      activeRanking=button.dataset.ranking;
+      rankingButtons.forEach(item=>item.setAttribute("aria-pressed",String(item===button)));
+      renderRankings();
+    }));
+    search.addEventListener("input",render);
+    refreshButton.addEventListener("click",()=>loadReport(true));
+    render();
+    loadReport(false);
+    window.setInterval(()=>loadReport(false),60000);
+  </script>
+</body>
+</html>
